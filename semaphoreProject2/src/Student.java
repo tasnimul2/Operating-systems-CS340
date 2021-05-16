@@ -11,12 +11,21 @@ public class Student implements  Runnable{
         goToYard();
         try {
             Main.enterSchool.acquire();
+            msg("is now in the school and waiting for principals decision");
+            if(wasStudentLate()){
+                msg("was late to school and is being sent home");
+                return;
+            }
+            Main.waitForPrincipalDecision.acquire();
         } catch (InterruptedException e) {
             System.out.println("Student " + studentID + " is interrupted");
         }
         msg("running");
     }
 
+    private boolean wasStudentLate(){
+        return Main.yard[studentID] == 1;
+    }
     private void goToYard(){
         msg("On the way to the school yard");
         Main.yard[studentID] = 1;
