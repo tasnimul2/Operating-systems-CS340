@@ -10,17 +10,10 @@ public class Principal implements Runnable{
     @Override
     public void run() {
         msg("is on his way to let students in...");
-        //sleep(3000);
         letStudentsIn();
         sleep(1000);
-        for(int i = 0; i < Main.yard.length;i++){
-            if(Main.yard[i] == 2) {
-                sendToNurseOrClass(i);
-                Main.waitForPrincipalDecision.release();
-            }
-
-        }
-        msg("running");
+        makeDecisionForEachStudent();
+        Main.allStudentsHaveDestination.release();
     }
     private void letStudentsIn(){
         for(int i = 0; i < Main.yard.length;i++){
@@ -29,6 +22,15 @@ public class Principal implements Runnable{
                 msg("letting in student " + i + " into school");
             }
             Main.enterSchool.release();
+        }
+    }
+
+    private void makeDecisionForEachStudent(){
+        for(int i = 0; i < Main.yard.length;i++){
+            if(Main.yard[i] == 2) {
+                sendToNurseOrClass(i);
+                Main.waitForPrincipalDecision.release();
+            }
         }
     }
 

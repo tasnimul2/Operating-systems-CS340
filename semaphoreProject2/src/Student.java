@@ -17,10 +17,22 @@ public class Student implements  Runnable{
                 return;
             }
             Main.waitForPrincipalDecision.acquire();
+
+            if(Main.goToNurse[studentID]){
+                msg("waiting for nurse to arrive");
+                Main.nursesRoom.acquire();
+                if(Main.hasCovid[studentID]){
+                    msg("Tested positive for COVID and is now going home");
+                    return;
+                }
+                msg("left the nurses room");
+            }
+            msg("is headed to class");
+
         } catch (InterruptedException e) {
             System.out.println("Student " + studentID + " is interrupted");
         }
-        msg("running");
+
     }
 
     private boolean wasStudentLate(){
