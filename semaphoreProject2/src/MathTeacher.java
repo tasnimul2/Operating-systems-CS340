@@ -1,13 +1,19 @@
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public class MathTeacher implements Runnable{
     public static long time = System.currentTimeMillis();
     private String threadName;
-    public static Semaphore mathClassSession;
+    public static volatile Queue<Integer> mathClassSession;
+    public static volatile Semaphore availableMathSeats;
+
+
     public MathTeacher(String name){
         Thread.currentThread().setName(name);
         threadName = Thread.currentThread().getName();
-        mathClassSession = new Semaphore(6,true);
+        mathClassSession = new LinkedList<>();
+        availableMathSeats = new Semaphore(6);
     }
 
     @Override
@@ -18,8 +24,13 @@ public class MathTeacher implements Runnable{
         while (Main.numStudentsWaiting.getAndDecrement() > 0){
             Main.waitForTeacherToArrive.release();
         }
+        goToNewSession();
+        walkToClass(6000);
+        msg("waited 6 sec");
 
-    }
+
+
+    }//end of run
 
     private void waitForNurseToFinish(){
         try {
@@ -33,6 +44,19 @@ public class MathTeacher implements Runnable{
             Thread.sleep(time);
         } catch (InterruptedException e) {
             msg("interrupted");
+        }
+    }
+
+    private void goToNewSession(){
+        try {
+            Principal.endClassSignal.acquire();
+            while (!mathClassSession.isEmpty()) {
+                mathClassSession.poll();
+                availableMathSeats.release();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

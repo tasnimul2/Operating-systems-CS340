@@ -1,14 +1,18 @@
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public class ElaTeacher implements Runnable{
     public static long time = System.currentTimeMillis();
     private String threadName;
-    public static Semaphore elaClassSession;
+    public static volatile Queue<Integer> elaClassSession;
+    public static volatile Semaphore availableElaSeats;
 
     public ElaTeacher(String name){
         Thread.currentThread().setName(name);
         threadName = Thread.currentThread().getName();
-        elaClassSession = new Semaphore(6,true);
+        elaClassSession = new LinkedList<>();
+        availableElaSeats = new Semaphore(6);
     }
 
     @Override
@@ -19,7 +23,12 @@ public class ElaTeacher implements Runnable{
         while (Main.numStudentsWaiting.getAndDecrement() > 0){
             Main.waitForTeacherToArrive.release();
         }
-    }
+        goToNewSession();
+        walkToClass(6000);
+        msg("waited 6 sec");
+
+
+    }//end of run
 
     private void waitForNurseToFinish(){
         try {
@@ -33,6 +42,18 @@ public class ElaTeacher implements Runnable{
             Thread.sleep(time);
         } catch (InterruptedException e) {
             msg("interrupted");
+        }
+    }
+
+    private void goToNewSession(){
+        try {
+            Principal.endClassSignal.acquire();
+            while (!elaClassSession.isEmpty()) {
+                elaClassSession.poll();
+                availableElaSeats.release();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

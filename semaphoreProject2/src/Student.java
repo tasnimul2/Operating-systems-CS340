@@ -1,9 +1,16 @@
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Student implements  Runnable{
     public volatile int studentID;
     public static long time = System.currentTimeMillis();
 
+
+
     public Student(int id){
         this.studentID = id;
+
+
     }
 
     @Override
@@ -17,7 +24,6 @@ public class Student implements  Runnable{
                 return;
             }
             Main.waitForPrincipalDecision.acquire();
-
             if(Main.goToNurse[studentID]){
                 msg("waiting for nurse to arrive");
                 Main.nursesRoom.acquire();
@@ -31,8 +37,9 @@ public class Student implements  Runnable{
             msg("Waiting for teacher to arrive");
             Main.numStudentsWaiting.incrementAndGet();
             Main.waitForTeacherToArrive.acquire();
-
-
+            findAClass();
+            sleep(6000);
+            msg("waited 6 sec");
 
         } catch (InterruptedException e) {
             System.out.println("Student " + studentID + " is interrupted");
@@ -46,6 +53,28 @@ public class Student implements  Runnable{
     private void goToYard(){
         msg("On the way to the school yard");
         Main.yard[studentID] = 1;
+    }
+    private void findAClass(){
+        try {
+            if(!Main.wentToELA[studentID] && ElaTeacher.elaClassSession.size() < 6){
+                ElaTeacher.elaClassSession.add(studentID);
+                ElaTeacher.availableElaSeats.acquire();
+                Main.wentToELA[studentID] = true;
+                msg("went ELA Class");
+            }else if(!Main.wentToMath[studentID] && MathTeacher.mathClassSession.size() < 6){
+                MathTeacher.mathClassSession.add(studentID);
+                MathTeacher.availableMathSeats.acquire();
+                Main.wentToMath[studentID] = true;
+                msg("went Math Class");
+            }else {
+                msg("playing in the yard");
+                sleep(3000);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 

@@ -1,10 +1,14 @@
+import java.util.concurrent.Semaphore;
+
 public class Principal implements Runnable{
     public static long time = System.currentTimeMillis();
     private String threadName;
+    public static Semaphore endClassSignal;
 
     public Principal(String name){
         Thread.currentThread().setName(name);
         threadName = Thread.currentThread().getName();
+        endClassSignal = new Semaphore(0);
     }
 
     @Override
@@ -14,6 +18,10 @@ public class Principal implements Runnable{
         sleep(1000);
         makeDecisionForEachStudent();
         Main.allStudentsHaveDestination.release();
+        startNewClassSession();
+        sleep(6000);
+        msg("waited 6 sec");
+
     }
     private void letStudentsIn(){
         for(int i = 0; i < Main.yard.length;i++){
@@ -23,6 +31,12 @@ public class Principal implements Runnable{
             }
             Main.enterSchool.release();
         }
+    }
+    private void startNewClassSession(){
+        sleep(10000);//class sessions in progress
+        msg("Class Sessions ending");
+        endClassSignal.release();
+        endClassSignal.release();
     }
 
     private void makeDecisionForEachStudent(){
