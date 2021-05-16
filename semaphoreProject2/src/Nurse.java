@@ -1,9 +1,13 @@
+import java.util.concurrent.Semaphore;
+
 public class Nurse implements Runnable {
     public static long time = System.currentTimeMillis();
+    public static Semaphore nurseIsDone;
     private String threadName;
     public Nurse(String name){
         Thread.currentThread().setName(name);
         threadName = Thread.currentThread().getName();
+        nurseIsDone = new Semaphore(0,true);
     }
 
     @Override
@@ -13,6 +17,9 @@ public class Nurse implements Runnable {
         waitForPrincipalToFinishDeciding();
         msg("arrived at her office to administer tests");
         callStudentsIntoOffice();
+
+        nurseIsDone.release();
+        nurseIsDone.release();
     }
 
     private void sleep(int time){

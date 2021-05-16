@@ -28,6 +28,11 @@ public class Student implements  Runnable{
                 msg("left the nurses room");
             }
             msg("is headed to class");
+            msg("Waiting for teacher to arrive");
+            Main.numStudentsWaiting.incrementAndGet();
+            Main.waitForTeacherToArrive.acquire();
+
+
 
         } catch (InterruptedException e) {
             System.out.println("Student " + studentID + " is interrupted");
