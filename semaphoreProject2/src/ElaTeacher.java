@@ -14,7 +14,9 @@ public class ElaTeacher implements Runnable{
         elaClassSession = new LinkedList<>();
         availableElaSeats = new Semaphore(6);
     }
-
+    /** Run method: check if the nurse is done with the students. When the nurse is done signal all students that the teacher is here
+     * then start class and wait for principal to tell teacher session is over. Then wait for principal to finish doing attendance.
+     * once done, go home**/
     @Override
     public void run() {
         waitForNurseToFinish();
@@ -34,6 +36,7 @@ public class ElaTeacher implements Runnable{
 
     }//end of run
 
+    /** wait for nurse to signal that the nurse is done**/
     private void waitForNurseToFinish(){
         try {
             Nurse.nurseIsDone.acquire();
@@ -41,6 +44,7 @@ public class ElaTeacher implements Runnable{
             e.printStackTrace();
         }
     }
+    /** simulate walking to class with sleep**/
     private void walkToClass(int time){
         try {
             Thread.sleep(time);
@@ -48,6 +52,10 @@ public class ElaTeacher implements Runnable{
             msg("interrupted");
         }
     }
+
+    /** while waiting for the principal to signal the end of class, the class is in session.
+     * when the principal signals the end of class, all the the students who has acquired a
+     * seat is told to leave the seat to free up room for the next session**/
 
     private void goToClassSession(){
         try {

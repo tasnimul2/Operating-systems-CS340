@@ -14,11 +14,11 @@ public class Nurse implements Runnable {
     public void run() {
         sleep(3000);//simulate driving to school
         msg("arrived to the school");
-        waitForPrincipalToFinishDeciding();
+        waitForPrincipalToFinishDeciding(); //waits for principal to signal if Nurse can conduct tests
         msg("arrived at her office to administer tests");
-        callStudentsIntoOffice();
+        callStudentsIntoOffice(); //conduct covid tests
 
-        nurseIsDone.release();
+        nurseIsDone.release(); //tell teacher nurse is done
         nurseIsDone.release();
     }
 
@@ -29,6 +29,7 @@ public class Nurse implements Runnable {
             msg("interrupted");
         }
     }
+    /** wait to be signaled by the principal to start covid tests**/
     private void waitForPrincipalToFinishDeciding(){
         try {
             Main.allStudentsHaveDestination.acquire();
@@ -36,6 +37,8 @@ public class Nurse implements Runnable {
             msg("all students have destination interrupted");
         }
     }
+    /** Until the nursesRoomQueue isn't empty, call the conductCovidTest() method. Then signal students to leave the nurses room with the
+     * nursesRoom semaphore **/
     private void callStudentsIntoOffice(){
         while(!Main.nursesRoomQueue.isEmpty()){
             if(Main.nursesRoomQueue.peek() != null) {
@@ -47,6 +50,8 @@ public class Nurse implements Runnable {
         }
     }
 
+    /** conducts covid test on each student by checking the probability. If a random number between 1 to 100 is 3 or less
+     * then the student has covid. otherwise they don't **/
     private void conductCovidTest(int student){
         if ((int) (Math.random() * (100) + 1) <= 3) {
             Main.hasCovid[student] = true;

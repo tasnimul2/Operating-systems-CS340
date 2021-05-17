@@ -15,6 +15,12 @@ public class Principal implements Runnable{
         doAttendance = new Semaphore(0);
     }
 
+    /** Run Method: Initially lets the student into the school. sleeps for 1 second to simulate moving to a different location
+     * to tell students where to go. Once making decision, principal signals nurse he is done with allStudentsHaveDestination semaphore.
+     * so that the nurse can start testing all students who were sent to be tested. Then the principal simulates classes in session
+     * with the startNewClassSession() method and signals the teacher when done with the endClassSignal semaphore Then the principal takes
+     * the attendance of the students and when finished, signals the teachers that they can lave by signaling doAttendance.**/
+
     @Override
     public void run() {
         msg("is on his way to let students in...");
@@ -36,6 +42,8 @@ public class Principal implements Runnable{
 
 
     }
+    /** loops the the school yard and if there is a student there ie. yard[i] is 1, then turn it to 2, signifying that the
+     * student was not late.**/
     private void letStudentsIn(){
         for(int i = 0; i < Main.yard.length;i++){
             if(Main.yard[i] == 1) {
@@ -45,13 +53,9 @@ public class Principal implements Runnable{
             Main.enterSchool.release();
         }
     }
-    private void startNewClassSession(){
-        sleep(10000);//class sessions in progress
-        msg("Class Sessions ending");
-        endClassSignal.release();
-        endClassSignal.release();
-    }
 
+
+    /** decide whether the student should do to class of curse by calling on the sendToNurseOrClass() method**/
     private void makeDecisionForEachStudent(){
         for(int i = 0; i < Main.yard.length;i++){
             if(Main.yard[i] == 2) {
@@ -60,6 +64,10 @@ public class Principal implements Runnable{
             }
         }
     }
+
+    /** out of every 3 students, pick a student to do to the nurse. set the goToNurse flag for that student to be true that way
+     * it will keep track of tested students for the future. Add that student to the nursesRoom queue. or else add that student
+     * to the classRoomQueue**/
 
     private void sendToNurseOrClass(int student){
         if ((int) (Math.random() * (3) + 1) == 1) {
@@ -71,6 +79,13 @@ public class Principal implements Runnable{
             Main.classRoomQueue.add(student);
             msg("tells student #"+student+ " to go to class");
         }
+    }
+    /** simulates the classing running with 10 second sleep then signals the teachers that the class is over**/
+    private void startNewClassSession(){
+        sleep(10000);//class sessions in progress
+        msg("Class Sessions ending");
+        endClassSignal.release();
+        endClassSignal.release();
     }
 
 

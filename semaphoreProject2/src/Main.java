@@ -28,6 +28,8 @@ public class Main {
     public static AtomicInteger numStudentsWaiting;
     public static AtomicInteger studentIdOrder;
 
+    /** LOOKING THE THE STUDENT THREAD FIRST WILL ALLOW YOU TO BETTER UNDERSTAND THE PROGRAM **/
+    /** Main method is responsible for starting all the threads**/
     public static void main(String[] args){
         numStudents = 20;
         if(args.length != 0){
