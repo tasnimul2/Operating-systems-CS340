@@ -6,6 +6,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
+    public static volatile int numStudents;
     public static Thread[] students;
     public static Thread principal;
     public static Thread nurse;
@@ -25,9 +26,10 @@ public class Main {
     public static volatile Queue<Integer> nursesRoomQueue;
     public static volatile Queue<Integer> classRoomQueue;
     public static AtomicInteger numStudentsWaiting;
+    public static AtomicInteger studentIdOrder;
 
     public static void main(String[] args){
-        int numStudents = 20;
+        numStudents = 20;
         if(args.length != 0){
             numStudents = Integer.parseInt(args[0]);
         }
@@ -51,6 +53,7 @@ public class Main {
         nursesRoomQueue = new LinkedList<>();//will hold the student id of students who need to go to nurse.
         classRoomQueue = new LinkedList<>();//will hold the student id of students who need to go to class.
         numStudentsWaiting = new AtomicInteger(0);
+        studentIdOrder = new AtomicInteger(0);
         for(int i = 0; i < students.length; i++){
             students[i] = new Thread(new Student(i));
         }
