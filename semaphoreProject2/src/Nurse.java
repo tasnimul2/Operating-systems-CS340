@@ -39,6 +39,7 @@ public class Nurse implements Runnable {
     private void callStudentsIntoOffice(){
         while(!Main.nursesRoomQueue.isEmpty()){
             if(Main.nursesRoomQueue.peek() != null) {
+                msg("giving a covid test to student " + Main.nursesRoomQueue.peek());
                 conductCovidTest(Main.nursesRoomQueue.poll());
                 Main.nursesRoom.release();
             }

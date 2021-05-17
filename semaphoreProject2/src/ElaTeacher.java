@@ -23,9 +23,13 @@ public class ElaTeacher implements Runnable{
         while (Main.numStudentsWaiting.getAndDecrement() > 0){
             Main.waitForTeacherToArrive.release();
         }
-        goToNewSession();
-        walkToClass(6000);
-        msg("waited 6 sec");
+        goToClassSession();
+        try {
+            Principal.doAttendance.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        msg("DONE TEACHING. HEADED HOME");
 
 
     }//end of run
@@ -45,13 +49,14 @@ public class ElaTeacher implements Runnable{
         }
     }
 
-    private void goToNewSession(){
+    private void goToClassSession(){
         try {
             Principal.endClassSignal.acquire();
-            while (!elaClassSession.isEmpty()) {
+            while (availableElaSeats.getQueueLength() > 0) {
                 elaClassSession.poll();
                 availableElaSeats.release();
             }
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

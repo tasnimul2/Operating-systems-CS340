@@ -16,6 +16,7 @@ public class Main {
     public static Semaphore allStudentsHaveDestination;
     public static Semaphore nursesRoom;
     public static Semaphore waitForTeacherToArrive;
+    public static volatile Semaphore getAttendenceTaken;
     public static volatile int[] yard;
     public static volatile boolean[] goToNurse;
     public static volatile boolean[] hasCovid;
@@ -41,6 +42,7 @@ public class Main {
         nursesRoom = new Semaphore(0,true);
         allStudentsHaveDestination = new Semaphore(0,true);
         waitForTeacherToArrive = new Semaphore(0,true);
+        getAttendenceTaken = new Semaphore(0,true);
         yard = new int[numStudents];
         goToNurse = new boolean[numStudents];
         hasCovid = new boolean[numStudents];

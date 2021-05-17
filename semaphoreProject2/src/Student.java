@@ -4,13 +4,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Student implements  Runnable{
     public volatile int studentID;
     public static long time = System.currentTimeMillis();
+    public static Semaphore mutex1;
+    public static AtomicInteger currEla,currMath;
 
 
 
     public Student(int id){
         this.studentID = id;
-
-
+        mutex1 = new Semaphore(1);
+        currEla = new AtomicInteger(0);
+        currMath = new AtomicInteger(0);
     }
 
     @Override
@@ -38,8 +41,13 @@ public class Student implements  Runnable{
             Main.numStudentsWaiting.incrementAndGet();
             Main.waitForTeacherToArrive.acquire();
             findAClass();
-            sleep(6000);
-            msg("waited 6 sec");
+            msg("is going to second session");
+            sleep(10000);
+            goToOtherClasses();
+            Main.getAttendenceTaken.acquire();
+            msg("attendance");
+
+
 
         } catch (InterruptedException e) {
             System.out.println("Student " + studentID + " is interrupted");
@@ -68,13 +76,41 @@ public class Student implements  Runnable{
                 msg("went Math Class");
             }else {
                 msg("playing in the yard");
-                sleep(3000);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
 
+    }
+
+    private void goToOtherClasses(){
+        while(!Main.wentToMath[studentID] && !Main.wentToELA[studentID]){
+            try {
+                mutex1.acquire();
+                if (!Main.wentToELA[studentID] &&  currEla.get()< 6) {
+                    currEla.incrementAndGet();
+                    Main.wentToELA[studentID] = true;
+                    msg("went ELA Class");
+                } else if (!Main.wentToMath[studentID] && currMath.get() < 6) {
+                    currMath.incrementAndGet();
+                    Main.wentToMath[studentID] = true;
+                    msg("went Math Class");
+                } else {
+                    msg("playing in the yard");
+                    currEla.decrementAndGet();
+                    currMath.decrementAndGet();
+
+                }
+                mutex1.release();
+
+
+                //currEla.decrementAndGet();
+                //currMath.decrementAndGet();
+            }catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 

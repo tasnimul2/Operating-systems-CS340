@@ -1,14 +1,18 @@
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Principal implements Runnable{
     public static long time = System.currentTimeMillis();
     private String threadName;
     public static Semaphore endClassSignal;
+    public static Semaphore doAttendance;
+    public static AtomicBoolean studentsNotDoneWithClass;
 
     public Principal(String name){
         Thread.currentThread().setName(name);
         threadName = Thread.currentThread().getName();
         endClassSignal = new Semaphore(0);
+        doAttendance = new Semaphore(0);
     }
 
     @Override
@@ -19,8 +23,17 @@ public class Principal implements Runnable{
         makeDecisionForEachStudent();
         Main.allStudentsHaveDestination.release();
         startNewClassSession();
-        sleep(6000);
-        msg("waited 6 sec");
+
+        sleep(10000);
+        while(Main.getAttendenceTaken.getQueueLength() > 0){
+            Main.getAttendenceTaken.release();
+        }
+        sleep(3000);
+        doAttendance.release();
+        doAttendance.release();
+        sleep(3000);
+        msg("SCHOOL DAY OVER. PRINCIPAL IS NOW LEAVING");
+
 
     }
     private void letStudentsIn(){

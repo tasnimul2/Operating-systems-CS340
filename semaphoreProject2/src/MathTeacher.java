@@ -24,9 +24,15 @@ public class MathTeacher implements Runnable{
         while (Main.numStudentsWaiting.getAndDecrement() > 0){
             Main.waitForTeacherToArrive.release();
         }
-        goToNewSession();
-        walkToClass(6000);
-        msg("waited 6 sec");
+        goToClassSession();
+        try {
+            Principal.doAttendance.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        msg("DONE TEACHING. HEADED HOME");
+
+
 
 
 
@@ -47,13 +53,14 @@ public class MathTeacher implements Runnable{
         }
     }
 
-    private void goToNewSession(){
+    private void goToClassSession(){
         try {
             Principal.endClassSignal.acquire();
-            while (!mathClassSession.isEmpty()) {
+            while (availableMathSeats.getQueueLength() > 0) {
                 mathClassSession.poll();
                 availableMathSeats.release();
             }
+
 
         } catch (InterruptedException e) {
             e.printStackTrace();
